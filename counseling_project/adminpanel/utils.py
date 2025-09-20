@@ -92,7 +92,7 @@ def send_allocation_notifications():
             allocation = SeatAllocation.objects.get(student=student)
             Notification.objects.create(
                 student=student.user,
-                message=f"🎉 You have been allocated a seat in {allocation.allocated_branch}.kindly upload your paymet receipt for confirmation"
+                message=f"🎉 You have been allocated a seat in {allocation.allocated_branch}.kindly upload your payment receipt for confirmation"
             )
         except SeatAllocation.DoesNotExist:
             Notification.objects.create(

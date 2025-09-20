@@ -26,7 +26,8 @@ sys.path.insert(0, BASE_DIR)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['hj.pythonanywhere.com']
+
 
 
 # Application definition
@@ -171,6 +172,8 @@ EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 
 LOGIN_REDIRECT_URL = '/adminpanel/social-redirect/'
 SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/adminpanel/social-redirect/'
+SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI = "https://hj.pythonanywhere.com/auth/complete/google-oauth2/"
+
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
