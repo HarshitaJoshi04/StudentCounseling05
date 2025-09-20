@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*.sqlite3
+*.log
+
+# Django
+*.pyc
+db.sqlite3
+.env
+counseling_project/media/
+media/
+staticfiles/
+
+# VS Code
+.vscode/
+
+# Virtual Environment
+venv/

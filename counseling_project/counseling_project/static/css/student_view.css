@@ -1,0 +1,119 @@
+/* Main card container */
+.Container {
+  max-width: 700px;
+  margin: 40px auto;
+  background: #ffffff;
+  padding: 35px;
+  border-radius: 15px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.18);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Student name */
+.Container h2 {
+  font-weight: 700;
+  color: #0d6efd; /* Bootstrap primary */
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+/* Section headings */
+.Container h4 {
+  margin-top: 30px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.Container h4:first-of-type {
+  color: #dc3545; /* Marks heading in red */
+}
+
+.Container h4:last-of-type {
+  color: #0d6efd; /* Documents heading in blue */
+}
+
+/* Student details text */
+.Container p {
+  font-size: 16px;
+  margin: 6px 0;
+  color: #333;
+}
+
+/* Lists */
+.Container ul {
+  list-style: none;
+  padding: 0;
+  margin-top: 10px;
+}
+
+.Container ul li {
+  margin: 10px 0;
+  font-size: 15px;
+  color: #222;
+}
+
+/* View buttons */
+.Container a.btn {
+  background: #f8f9fa;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  transition: 0.3s;
+}
+
+.Container a.btn:hover {
+  background: #0d6efd;
+  color: white;
+}
+
+/* Action buttons (Approve / Reject) */
+.Container form {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.Container form button {
+  border: none;
+  padding: 12px 25px;
+  font-size: 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.3s;
+  font-weight: 600;
+}
+
+.Container form button[name="action"][value="approve"] {
+  background-color: #198754; /* Green */
+  color: white;
+}
+
+.Container form button[name="action"][value="approve"]:hover {
+  background-color: #157347;
+}
+
+.Container form button[name="action"][value="reject"] {
+  background-color: #dc3545; /* Red */
+  color: white;
+}
+
+.Container form button[name="action"][value="reject"]:hover {
+  background-color: #bb2d3b;
+}
+
+/* Back button */
+.Container .btn.mt-3 {
+  display: block;
+  margin: 25px auto 0;
+  background: #6c757d;
+  color: white;
+  padding: 8px 20px;
+  border-radius: 8px;
+  transition: 0.3s;
+}
+
+.Container .btn.mt-3:hover {
+  background: #5a6268;
+}

@@ -1,0 +1,62 @@
+{% extends 'layout.html' %}
+{% load static %}'
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/student_view.css' %}">
+{% endblock %}
+{% block title %}Student Details{% endblock %}
+
+{% block navbar %} <nav class="navbar">
+               <div class="branding-text">
+            
+      <h1>🎓XYZ College of Engineering, City</h1>
+      <p >Online Student Counseling & Admission Portal</p>
+    </div>
+
+    <div class="name fs-4 text-black ">🎓Student Data</a></div>
+      <div class="hamburger" onclick="toggleMenu()">☰</div>
+    <ul class="navlinks" id="navLinks">
+        <li><a href="{% url 'admin_dashboard' %}" class="btn btn-outline-light">Home</a></li>
+    </ul>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="Container">
+    <h2>Student: {{ student.full_name }}</h2>
+    <p><strong>Email:</strong> {{ student.profile_email }}</p>
+    <p><strong>Status:</strong> {{ student.verification_status }}</p>
+    <p><strong>Phone:</strong> {{ student.phone }}</p>
+    <p><strong>Adhaar no.:</strong> {{ student.aadhaar_number }}</p>
+
+    <h4>🎯 Marks</h4>
+    <ul>
+        <li>10th %: {{ tenth_percent }}</li>
+        <li>12th %: {{ twelfth_percent }}</li>
+    </ul>
+
+    <h4>📄 Uploaded Documents</h4>
+    <ul>
+
+        <li>Aadhaar: <a href="{{ student.aadhar_file.url }}" class="btn btn-sm  px-3 py-1 mt-2" target="_blank">View</a>
+        </li>
+        <li>10th Marksheet: <a href="{{ student.tenth_result.url }}" class="btn btn-sm px-3 py-1 mt-2"
+                target="_blank">View</a></li>
+        <li>12th Marksheet: <a href="{{ student.twelfth_result.url }}" class="btn btn-sm px-3 py-1 mt-2"
+                target="_blank">View</a></li>
+    </ul>
+
+    <form method="POST" action="{% url 'verify_student' %}">
+        {% csrf_token %}
+        <input type="hidden" name="student_id" value="{{ student.id }}">
+        <button type="submit" name="action" value="approve" onclick="return confirm('Are you sure you want to approve the information?')">✅ Approve</button>
+        <button type="submit" name="action" value="reject"  onclick="return confirm('Are you sure you want to approve the information?')">❌ Reject</button>
+    </form>
+
+    <a href="{% url 'admin_dashboard' %}" class="btn  mt-3">⬅️ Back to Dashboard</a>
+</div>
+{% endblock %}
+{% block scripts %}
+   <script src="{% static 'js/hamburger.js' %}"></script>
+{% endblock %} 
+{% block footer %}
+{% endblock%}

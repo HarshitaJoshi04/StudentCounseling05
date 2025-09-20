@@ -1,0 +1,43 @@
+{% extends 'layout.html' %}
+{% load static %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/notification.css' %}"> {% endblock %}
+
+{% block title %}Notifications{% endblock %}
+
+    {% block navbar %}
+    <nav class="navbar">
+           <div class="branding-text">
+      <h1>🎓XYZ College of Engineering, City</h1>
+      <p>Online Student Counseling & Admission Portal</p>
+    </div>
+     <div class="hamburger" onclick="toggleMenu()">☰</div>
+        <ul class="navlinks" id="navLinks">
+           <li><a style="border:none;font-size:1.3rem; "href="{% url 'student_dashboard' %}">Home</a></li>
+           
+        </ul>
+    </nav>
+    {% endblock %}
+{% block content %}
+<h2 style="color:white;">🔔 Your Notifications</h2>
+
+{% if notifications %}
+<ul class="notification-list">
+    {% for note in notifications %}
+    <li class="{% if not note.seen %}unseen bg{% endif %}">
+        {{ note.message|safe }}<br>
+        <small class="text-muted">{{ note.created_at|date:"d M Y, h:i A" }}</small><br>
+        <small>Status: {{ note.seen }}</small>
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<div class="alert alert-warning">No notifications yet.</div>
+{% endif %}
+
+{% endblock %}
+{% block scripts %}
+   <script src="{% static 'js/hamburger.js' %}"></script>
+{% endblock %} 
+{% block footer %}
+{% endblock%}
