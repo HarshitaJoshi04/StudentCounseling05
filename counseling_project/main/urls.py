@@ -13,4 +13,8 @@ urlpatterns = [
     path('upload-fee-receipt/', views.upload_fee_receipt, name='upload_fee_receipt'),
     path('download-offer-letter/', views.download_offer_letter, name='download_offer_letter'),
     path('verify-otp/', views.verify_otp, name='verify_otp'),
+        # Forgot Password for Student
+    path('student/forgot-password/', views.student_forgot_password, name='student_forgot_password'),
+    path('student/verify-otp/', views.student_verify_otp, name='student_verify_otp'),
+    path('student/reset-password/', views.student_reset_password, name='student_reset_password'),
 ]

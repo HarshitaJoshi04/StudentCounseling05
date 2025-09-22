@@ -33,6 +33,12 @@
             <button type="submit">Login</button>
 
         </form>
+          
+              <p>
+         <a href="{% url 'admin_forgot_password' %}" class="text-blue-500 hover:underline">
+            Forgot Password?
+         </a>
+      </p>
 
         <p>Don't have an account? <a href="{% url 'admin_signup' %}">register</a></p>
     </div>
@@ -44,4 +50,7 @@
 
 {% endblock %}
 {% block footer %}
-{% endblock%}
+<footer class="footer">
+      <p>&copy; 2025 Admin Portal</p>
+    </footer>
+    {% endblock %}

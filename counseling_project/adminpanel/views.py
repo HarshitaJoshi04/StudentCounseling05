@@ -24,6 +24,10 @@ from django.core.mail import send_mail
 from datetime import timedelta
 from django.contrib.auth import get_backends
 from .models import AdminProfile
+from main.utils import send_password_reset_otp
+
+
+from main.models import PasswordResetOTP 
 # Create your views here.
 print("LOADED ADMIN SECRET:", getattr(settings, 'ADMIN_SECRET_KEY', '❌ NOT FOUND'))
  
@@ -67,32 +71,35 @@ def admin_home(request):
 
        
 def admin_login(request):
-    if request.method=='POST':
-      username=request.POST['username']
-      password=request.POST['password']
-      user=authenticate(request,username=username, password=password)
-      if user is not None and user.is_staff:
-         login(request, user)
-       
-        # ✅ Check database verification status
-         try:
-           profile = AdminProfile.objects.get(user=user)
-           if profile.is_verified:
-             request.session['is_verified_admin'] = True
-             return redirect('admin_dashboard')
-           else:
-             messages.error(request, "Please verify your email before accessing dashboard.")
-             logout(request)
-             return redirect('admin_home')
-         except AdminProfile.DoesNotExist:
-           messages.error(request, "Verification data missing. Please register again.")
-           logout(request)
-           return redirect('admin_home') # or redirect to verify page
-    
-         
-      else:
-         return render(request, 'adminpanel/admin_login.html', {'error': 'Invalid credentials or not an admin'})
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+        if user is not None and user.is_staff:
+            login(request, user)
+
+            # ✅ Check database verification status
+            try:
+                profile = AdminProfile.objects.get(user=user)
+                if profile.is_verified:
+                    request.session['is_verified_admin'] = True
+                    return redirect('admin_dashboard')
+                else:
+                    messages.error(request, "Please verify your email before accessing dashboard.")
+                    logout(request)
+                    return redirect('admin_home')
+            except AdminProfile.DoesNotExist:
+             # ✅ Auto-create profile if missing
+                 profile = AdminProfile.objects.create(user=user, is_verified=True)
+                 request.session['is_verified_admin'] = True
+                 return redirect('admin_dashboard')
+
+
+        else:
+            messages.error(request, "Invalid credentials or not an admin.")
+            return redirect('admin_login')  # 👈 cleaned error part
     return render(request, 'adminpanel/admin_login.html')
+
 
 
 
@@ -335,3 +342,74 @@ def approve_receipt(request, id):
     except SeatAllocation.DoesNotExist:
         messages.error(request, "Seat allocation not found.")
     return redirect('admin_dashboard')
+# utils.py is already shared by both student + admin
+
+def admin_forgot_password(request):
+    if request.method == "POST":
+        email = request.POST.get("email").strip().lower()
+        try:
+            user = User.objects.get(email=email, is_staff=True)
+            send_password_reset_otp(user)
+
+            request.session['reset_email'] = email
+            messages.success(request, "An OTP has been sent to your email.")
+            return redirect("admin_verify_otp")
+        except User.DoesNotExist:
+            messages.error(request, "This admin email is not registered.")
+    return render(request, "adminpanel/forgot_password.html")
+
+
+def admin_verify_otp(request):
+    if request.method == "POST":
+        entered_otp = request.POST.get("otp")
+        email = request.session.get('reset_email')
+
+        print("Entered OTP:", entered_otp)
+        print("Session email:", email)
+
+        if not email:
+            messages.error(request, "Your session expired. Please request a new OTP.")
+            return redirect("admin_forgot_password")
+
+        try:
+            user = User.objects.get(email=email, is_staff=True)
+            otp_obj = PasswordResetOTP.objects.filter(user=user).last()
+            print("DB OTP:", otp_obj.otp if otp_obj else None)
+        except User.DoesNotExist:
+            messages.error(request, "Invalid session user.")
+            return redirect("admin_forgot_password")
+
+        if otp_obj and str(otp_obj.otp) == entered_otp:
+            request.session['otp_verified'] = True
+            return redirect("admin_reset_password")
+        else:
+            messages.error(request, "Invalid OTP.")
+    return render(request, "adminpanel/verify_otp.html")
+
+
+def admin_reset_password(request):
+    if request.method == "POST":
+        new_pass = request.POST.get("password")
+        confirm_pass = request.POST.get("confirm_password")
+
+        if new_pass == confirm_pass:
+            email = request.session.get('reset_email')
+            if request.session.get('otp_verified'):
+                try:
+                    user = User.objects.get(email=email, is_staff=True)
+                    user.set_password(new_pass)
+                    user.save(update_fields=["password"])
+
+                    # cleanup session
+                    request.session.pop('reset_email', None)
+                    request.session.pop('otp_verified', None)
+
+                    messages.success(request, "Password reset successful. Please login.")
+                    return redirect("admin_login")
+                except User.DoesNotExist:
+                    messages.error(request, "Something went wrong. Try again.")
+            else:
+                messages.error(request, "OTP not verified.")
+        else:
+            messages.error(request, "Passwords do not match.")
+    return render(request, "adminpanel/reset_password.html")

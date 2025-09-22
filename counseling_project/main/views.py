@@ -16,7 +16,10 @@ from django.utils import timezone
 from datetime import timedelta
 from django.http import HttpResponseForbidden
 from django.conf import settings
+from .models import PasswordResetOTP
 
+
+from .utils import send_password_reset_otp
 #  Home Page
 def home(request):
     return render(request, 'home.html')
@@ -56,7 +59,7 @@ def student_register(request):
             
                         # ✅ Create OTP and send it to email
             otp = str(random.randint(100000, 999999))
-            UserOTP.objects.update_or_create(user=user, defaults={'otp_code': otp})
+            UserOTP.objects.update_or_create(user=user, defaults={'otp': otp})
             send_mail(
                 subject="Your Email Verification OTP",
                 message=f"Your OTP is {otp}. Please do not share it.",
@@ -104,7 +107,7 @@ def verify_otp(request):
             return redirect('student_register')
 
 
-        if otp_input == user_otp.otp_code:
+        if otp_input == user_otp.otp:
             user_otp.delete()
             user.is_active = True 
             user.save()
@@ -300,3 +303,77 @@ def download_offer_letter(request):
     return generate_offer_letter(student)
 
 
+def student_forgot_password(request):
+    if request.method == "POST":
+        email = request.POST.get("email").strip().lower()
+
+        try:
+            user = User.objects.get(email=email, is_staff=False)  # student only
+            send_password_reset_otp(user)  # send OTP
+
+            # save email in session for later OTP verification
+            request.session['reset_email'] = email  
+
+            messages.success(request, "An OTP has been sent to your email.")
+            return redirect("student_verify_otp")  # correct name
+        except User.DoesNotExist:
+            messages.error(request, "This email is not registered.")
+
+    return render(request, "main/forgot_password.html")
+
+
+def student_verify_otp(request):
+    if request.method == "POST":
+        entered_otp = request.POST.get("otp")
+        email = request.session.get('reset_email')
+        print("Entered OTP:", entered_otp)
+        print("Session email:", email)
+
+        if not email:
+            messages.error(request, "Session expired. Try again.")
+            return redirect("student_forgot_password")
+
+        try:
+            user = User.objects.get(email=email, is_staff=False)
+            otp_obj = PasswordResetOTP.objects.filter(user=user).last()  # ✅ FIX
+            print("DB OTP:", otp_obj.otp if otp_obj else None)
+        except User.DoesNotExist:
+            messages.error(request, "Invalid session user.")
+            return redirect("student_forgot_password")
+
+        if otp_obj and str(otp_obj.otp) == entered_otp:
+            request.session['otp_verified'] = True
+            return redirect("student_reset_password")
+        else:
+            messages.error(request, "Invalid OTP.")
+    return render(request, "main/verify_otp1.html")
+
+
+def student_reset_password(request):
+    if request.method == "POST":
+        new_pass = request.POST.get("password")
+        confirm_pass = request.POST.get("confirm_password")
+
+        if new_pass == confirm_pass:
+            email = request.session.get('reset_email')
+            if request.session.get('otp_verified'):
+                try:
+                    user = User.objects.get(email=email, is_staff=False)
+                    user.set_password(new_pass)
+                    user.save()
+
+                    # cleanup session and OTP
+                    request.session.pop('reset_email', None)
+                    request.session.pop('otp_verified', None)
+                    PasswordResetOTP.objects.filter(user=user).delete()
+
+                    messages.success(request, "Password reset successful. Login now.")
+                    return redirect("student_login")
+                except User.DoesNotExist:
+                    messages.error(request, "Something went wrong. Try again.")
+            else:
+                messages.error(request, "OTP not verified.")
+        else:
+            messages.error(request, "Passwords do not match.")
+
+    return render(request, "main/reset_password.html")

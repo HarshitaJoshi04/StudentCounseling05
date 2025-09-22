@@ -15,4 +15,8 @@ urlpatterns = [
     path('student/<int:id>/view/', views.view_student, name='view_student'),
     path('verify-admin-otp/', views.verify_admin_otp, name='verify_admin_otp'),
     path('approve-receipt/<int:id>/', views.approve_receipt, name='approve_receipt'),
+    path("forgot-password/", views.admin_forgot_password, name="admin_forgot_password"),
+    path("verify-otp/", views.admin_verify_otp, name="admin_verify_otp"),
+    path("reset-password/", views.admin_reset_password, name="admin_reset_password"),
+
 ]

@@ -206,9 +206,12 @@
     </div>
 </div>
 {% endblock %}
+    {% block footer %}
 
-{% block footer %}
-{% endblock%}
+<footer class="footer">
+      <p>&copy; 2025 Admin Portal</p>
+    </footer>
+    {% endblock %}
 
 {% block scripts %}
 <script src="{% static 'js/dashboard.js' %}"></script>
@@ -240,4 +243,5 @@
     };
 </script>
         <script src="{% static 'js/hamburger.js' %}"></script>
+
 {% endblock %}
